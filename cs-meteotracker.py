@@ -226,7 +226,7 @@ def make_folium_map(df: pd.DataFrame, color_col: str) -> folium.Map | None:
         return None
     
     center = [gdf["Lat"].mean(), gdf["Lon"].mean()]
-    m = folium.Map(location=center, zoom_start=12, tiles="CartoDB positron")
+    m = folium.Map(location=center, zoom_start=12, tiles="CartoDB positron", scrollWheelZoom=False, dragging=False, zoom_control=True)       
     
     if color_col in gdf.columns and gdf[color_col].notna().any():
         vals = gdf[color_col].fillna(gdf[color_col].mean())
