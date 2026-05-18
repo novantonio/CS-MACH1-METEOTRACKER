@@ -1097,20 +1097,9 @@ if "logger_dfs" in st.session_state:
 
 # Footer
 # ══════════════════════════════════════════════════════════════════════════════
+st.markdown("---")
 
 cs_mach1_footer(
-    "CS-MACH1 AirLogger Pipeline · Streamlit + Matplotlib + Contextily + Folium"
+    "CS-MACH1 MeteoTracker Pipeline""
 )
-```
 
-## Required packages
-
-```bash
-pip install streamlit pandas numpy matplotlib folium streamlit-folium pyproj contextily
-```
-
-## Run locally
-
-```bash
-streamlit run app.py
-```
