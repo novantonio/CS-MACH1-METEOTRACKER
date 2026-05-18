@@ -1100,6 +1100,6 @@ if "logger_dfs" in st.session_state:
 st.markdown("---")
 
 cs_mach1_footer(
-    "CS-MACH1 MeteoTracker Pipeline""
+    "CS-MACH1 MeteoTracker Pipeline"
 )
 
