@@ -493,8 +493,11 @@ def make_folium_map(df: pd.DataFrame, color_col: str) -> folium.Map | None:
 
     m = folium.Map(
         location=center,
-        zoom_start=15,
+        zoom_start=4,
         tiles="CartoDB positron",
+        scrollWheelZoom=False,   # ← block mouse zoom
+        dragging=False,
+        zoom_control=True
     )
 
     if color_col in gdf.columns and gdf[color_col].notna().any():
