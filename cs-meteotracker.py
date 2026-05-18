@@ -277,16 +277,6 @@ if "logger_dfs" in st.session_state and st.session_state["logger_dfs"]:
     logger_dfs = st.session_state["logger_dfs"]
     win = st.session_state.get("window_size", 5)
 
-    st.markdown("### 🎨 Map Settings")
-    map_color_param = st.selectbox(
-        "Select parameter for map colouring",
-        options=[p[0] for p in CORE_PARAMS],
-        format_func=lambda c: next((p[1] for p in CORE_PARAMS if p[0] == c), c),
-        index=0,
-        key="map_color_main"
-    )
-    st.session_state["map_color_param"] = map_color_param
-
     for i, (fname, df) in enumerate(logger_dfs.items()):
         stem = Path(fname).stem
         st.markdown(f"### 📄 {fname}")
@@ -319,6 +309,7 @@ if "logger_dfs" in st.session_state and st.session_state["logger_dfs"]:
             st_folium(fmap, width="100%", height=480, key=f"map_single_{i}_{stem}")
         st.divider()
 
+
     # Combined Analysis
     st.markdown("## 📊 Combined Analysis — All Sessions")
     if len(logger_dfs) > 1:
@@ -329,6 +320,17 @@ if "logger_dfs" in st.session_state and st.session_state["logger_dfs"]:
             st_folium(combined_map, width="100%", height=520, key="combined_map_all")
 
     # Climatology Plots
+    st.markdown("### 🎨 Map Settings")
+    map_color_param = st.selectbox(
+        "Select parameter for map colouring",
+        options=[p[0] for p in CORE_PARAMS],
+        format_func=lambda c: next((p[1] for p in CORE_PARAMS if p[0] == c), c),
+        index=0,
+        key="map_color_main"
+    )
+    st.session_state["map_color_param"] = map_color_param
+    st.divider()
+    
     st.markdown("### 🌈 Temperature Climatology (All Files)")
     combined_frames = []
     for df in logger_dfs.values():
