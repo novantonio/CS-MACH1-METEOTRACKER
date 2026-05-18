@@ -338,59 +338,59 @@ if "logger_dfs" in st.session_state and st.session_state["logger_dfs"]:
             tmp['day_of_year'] = tmp['Time'].dt.dayofyear
             combined_frames.append(tmp)
 
-        if combined_frames:
-            combined_df = pd.concat(combined_frames, ignore_index=True)
-            min_temp = combined_df["Temp[°C]"].min()
-            max_temp = combined_df["Temp[°C]"].max()
-    
-            cmap = plt.colormaps['rainbow']
-            norm = mcolors.Normalize(vmin=min_temp, vmax=max_temp)
-    
-            # === SINGLE FIGURE WITH 2 SUBPLOTS ===
-            fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(18, 8), sharey=False)
-    
-            # Plot 1: Day of Year vs Hour
-            scatter1 = ax1.scatter(
-                combined_df['day_of_year'], 
-                combined_df['Hour'],
-                c=combined_df['Temp[°C]'], 
-                cmap=cmap, 
-                norm=norm, 
-                s=18, 
-                alpha=0.75
-            )
-            fig.colorbar(scatter1, ax=ax1).set_label('Temperature [°C]')
-            ax1.set_xlabel('Day of Year (1-366)')
-            ax1.set_ylabel('Hour of Day')
-            ax1.set_title('Temperature by Day of Year and Hour')
-            ax1.set_xlim(0, 367)
-            ax1.set_ylim(0, 24)
-            ax1.grid(True, alpha=0.3)
-    
-            # Plot 2: Day of Year vs Temperature
-            scatter2 = ax2.scatter(
-                combined_df['day_of_year'], 
-                combined_df['Temp[°C]'],
-                c=combined_df['Temp[°C]'], 
-                cmap=cmap, 
-                norm=norm, 
-                s=18, 
-                alpha=0.75
-            )
-            fig.colorbar(scatter2, ax=ax2).set_label('Temperature [°C]')
-            ax2.set_xlabel('Day of Year (1-366)')
-            ax2.set_ylabel('Temperature [°C]')
-            ax2.set_title('Temperature Distribution by Day of Year')
-            ax2.set_xlim(0, 367)
-            ax2.set_ylim(min_temp - 1, max_temp + 1)
-            ax2.grid(True, alpha=0.3)
-    
-            fig.suptitle('Temperature Climatology — All Sessions', fontsize=16, fontweight='bold', color=BRAND_BLUE)
-            fig.tight_layout()
-            
-            st.pyplot(fig)
-            #dl_btn(fig, "temperature_climatology_combined.png", "⬇️ Download Combined Climatology PNG")
-            plt.close(fig)
+    if combined_frames:
+        combined_df = pd.concat(combined_frames, ignore_index=True)
+        min_temp = combined_df["Temp[°C]"].min()
+        max_temp = combined_df["Temp[°C]"].max()
+
+        cmap = plt.colormaps['rainbow']
+        norm = mcolors.Normalize(vmin=min_temp, vmax=max_temp)
+
+        # === SINGLE FIGURE WITH 2 SUBPLOTS ===
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(18, 8), sharey=False)
+
+        # Plot 1: Day of Year vs Hour
+        scatter1 = ax1.scatter(
+            combined_df['day_of_year'], 
+            combined_df['Hour'],
+            c=combined_df['Temp[°C]'], 
+            cmap=cmap, 
+            norm=norm, 
+            s=18, 
+            alpha=0.75
+        )
+        fig.colorbar(scatter1, ax=ax1).set_label('Temperature [°C]')
+        ax1.set_xlabel('Day of Year (1-366)')
+        ax1.set_ylabel('Hour of Day')
+        ax1.set_title('Temperature by Day of Year and Hour')
+        ax1.set_xlim(0, 367)
+        ax1.set_ylim(0, 24)
+        ax1.grid(True, alpha=0.3)
+
+        # Plot 2: Day of Year vs Temperature
+        scatter2 = ax2.scatter(
+            combined_df['day_of_year'], 
+            combined_df['Temp[°C]'],
+            c=combined_df['Temp[°C]'], 
+            cmap=cmap, 
+            norm=norm, 
+            s=18, 
+            alpha=0.75
+        )
+        fig.colorbar(scatter2, ax=ax2).set_label('Temperature [°C]')
+        ax2.set_xlabel('Day of Year (1-366)')
+        ax2.set_ylabel('Temperature [°C]')
+        ax2.set_title('Temperature Distribution by Day of Year')
+        ax2.set_xlim(0, 367)
+        ax2.set_ylim(min_temp - 1, max_temp + 1)
+        ax2.grid(True, alpha=0.3)
+
+        fig.suptitle('Temperature Climatology — All Sessions', fontsize=16, fontweight='bold', color=BRAND_BLUE)
+        fig.tight_layout()
+        
+        st.pyplot(fig)
+        #dl_btn(fig, "temperature_climatology_combined.png", "⬇️ Download Combined Climatology PNG")
+        plt.close(fig)
 
         st.divider()
 
