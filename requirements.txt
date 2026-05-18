@@ -4,3 +4,5 @@ matplotlib>=3.8.0
 numpy>=1.26.0
 folium>=0.17.0
 streamlit-folium>=0.20.0
+contextily>=1.6.0
+pyproj>=3.6.0
