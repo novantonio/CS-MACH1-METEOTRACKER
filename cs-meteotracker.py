@@ -493,7 +493,7 @@ def make_folium_map(df: pd.DataFrame, color_col: str) -> folium.Map | None:
 
     m = folium.Map(
         location=center,
-        zoom_start=8,
+        zoom_start=13,
         tiles="CartoDB positron",
         scrollWheelZoom=False,   # ← block mouse zoom
         dragging=False,
