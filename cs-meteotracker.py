@@ -389,7 +389,7 @@ if "logger_dfs" in st.session_state and st.session_state["logger_dfs"]:
             fig.tight_layout()
             
             st.pyplot(fig)
-            dl_btn(fig, "temperature_climatology_combined.png", "⬇️ Download Combined Climatology PNG")
+            #dl_btn(fig, "temperature_climatology_combined.png", "⬇️ Download Combined Climatology PNG")
             plt.close(fig)
 
         st.divider()
