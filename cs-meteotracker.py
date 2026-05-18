@@ -175,7 +175,8 @@ def _plot_generic(ax, df, col, name, unit, color, window):
         return
     times = df.loc[series.index, "Time"]
     
-    no_roll_cols = {"DP[°C]", "θ[K]", "HDX[°C]", "Speed[km/h]", "Radiation[]"}
+    # no_roll_cols = {"DP[°C]", "θ[K]", "HDX[°C]", "Speed[km/h]", "Radiation[]"}
+    no_roll_cols = {"Speed[km/h]"}
     
     u = f" ({unit})" if unit else ""
     
