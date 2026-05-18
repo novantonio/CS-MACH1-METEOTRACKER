@@ -409,7 +409,7 @@ if "logger_dfs" in st.session_state and st.session_state["logger_dfs"]:
         ax2.set_ylabel('Temperature [°C]')
         ax2.set_title('Temperature Distribution by Day of Year')
         ax2.set_xlim(0, 367)
-        ax2.set_ylim(min_temp, max_temp)
+        ax2.set_ylim(0, 23)
         ax2.grid(True)
         st.pyplot(fig2)
         dl_btn(fig2, "temperature_dayofyear_temp.png")
