@@ -227,6 +227,16 @@ def _style_ax(ax):
 
 
 def _plot_generic(ax, df, col, name, unit, color, window):
+    """
+    Generic parameter plotter.
+
+    Rolling mean DISABLED for:
+    - Dew Point
+    - Potential Temperature
+    - Heat Discomfort
+    - Wind Speed
+    - Radiation
+    """
 
     series = df[col].dropna()
 
@@ -236,50 +246,56 @@ def _plot_generic(ax, df, col, name, unit, color, window):
 
     times = df.loc[series.index, "Time"]
 
-    rolling = series.rolling(
-        window=window,
-        min_periods=1,
-    ).mean()
-
-    p_mean = series.mean()
-    p_med = series.median()
+    no_roll_cols = {
+        "DP[°C]",
+        "θ[K]",
+        "HDX[°C]",
+        "Speed[km/h]",
+        "Radiation[]",
+    }
 
     u = f" ({unit})" if unit else ""
 
+    # Raw signal
     ax.plot(
         times,
         series,
-        alpha=0.28,
-        linewidth=0.7,
+        alpha=0.35,
+        linewidth=0.8,
         color=color,
-        label="Raw",
+        label="Raw data",
     )
 
-    ax.plot(
-        times,
-        rolling,
-        linewidth=2,
-        color="#E8524A",
-        label=f"Rolling (w={window})",
-    )
+    # Rolling only where desired
+    if col not in no_roll_cols:
+        rolling = series.rolling(window=window, min_periods=1).mean()
 
+        ax.plot(
+            times,
+            rolling,
+            linewidth=2,
+            color="#E8524A",
+            label=f"Rolling mean (w={window})",
+        )
+
+    # Statistics
     ax.axhline(
-        p_mean,
+        series.mean(),
         color="crimson",
         linewidth=1.3,
         linestyle="--",
-        label=f"Mean {p_mean:.2f}{u}",
+        label=f"Mean {series.mean():.2f}{u}",
     )
 
     ax.axhline(
-        p_med,
+        series.median(),
         color="darkorange",
         linewidth=1.3,
         linestyle="--",
-        label=f"Median {p_med:.2f}{u}",
+        label=f"Median {series.median():.2f}{u}",
     )
 
-    ax.legend(fontsize=6.5, loc="upper right", framealpha=0.7)
+    ax.legend(fontsize=6.5, loc="upper right", framealpha=0.75)
 
     ax.set_ylabel(f"{name}{u}", fontsize=8)
 
@@ -290,7 +306,14 @@ def _plot_generic(ax, df, col, name, unit, color, window):
         color="#333333",
     )
 
-    _style_ax(ax)
+    ax.grid(True, alpha=0.3)
+
+    ax.tick_params(axis="x", rotation=25, labelsize=7)
+    ax.tick_params(axis="y", labelsize=7)
+
+    ax.xaxis.set_major_formatter(
+        mdates.DateFormatter("%H:%M")
+    )
 
 # ══════════════════════════════════════════════════════════════════════════════
 # Generic parameter grid
@@ -354,7 +377,103 @@ def make_param_grid(
     fig.tight_layout()
 
     return fig
+# ══════════════════════════════════════════════════════════════════════════════
+# Altitude plotter
+# ══════════════════════════════════════════════════════════════════════════════
 
+def _plot_altitude(ax, df):
+    """
+    Altitude:
+    raw step-plot only
+    NO rolling mean
+    """
+
+    col = "Alt[m]"
+
+    if col not in df.columns or df[col].isna().all():
+        ax.set_visible(False)
+        return
+
+    series = df[col].dropna()
+
+    times = df.loc[
+        series.index,
+        "Time"
+    ]
+
+    # Step plot
+    ax.step(
+        times,
+        series,
+        where="mid",
+        linewidth=1.3,
+        color="slategray",
+        label="Altitude",
+    )
+
+    # Filled area
+    ax.fill_between(
+        times,
+        series,
+        step="mid",
+        alpha=0.18,
+        color="slategray",
+    )
+
+    # Mean line
+    ax.axhline(
+        series.mean(),
+        color="crimson",
+        linewidth=1.3,
+        linestyle="--",
+        label=f"Mean {series.mean():.1f} m",
+    )
+
+    # Median line
+    ax.axhline(
+        series.median(),
+        color="darkorange",
+        linewidth=1.3,
+        linestyle="--",
+        label=f"Median {series.median():.1f} m",
+    )
+
+    ax.legend(
+        fontsize=6.5,
+        loc="upper right",
+    )
+
+    ax.set_ylabel(
+        "Altitude (m)",
+        fontsize=8,
+    )
+
+    ax.set_title(
+        "Altitude",
+        fontsize=9,
+        fontweight="bold",
+    )
+
+    ax.grid(
+        True,
+        alpha=0.3,
+    )
+
+    ax.tick_params(
+        axis="x",
+        rotation=25,
+        labelsize=7,
+    )
+
+    ax.tick_params(
+        axis="y",
+        labelsize=7,
+    )
+
+    ax.xaxis.set_major_formatter(
+        mdates.DateFormatter("%H:%M")
+    )
+    
 # ══════════════════════════════════════════════════════════════════════════════
 # Interactive Folium map
 # ══════════════════════════════════════════════════════════════════════════════
