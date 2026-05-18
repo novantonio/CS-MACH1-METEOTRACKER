@@ -362,9 +362,7 @@ if "logger_dfs" in st.session_state and st.session_state["logger_dfs"]:
         if combined_map:
             st_folium(combined_map, width="100%", height=520, key="combined_map")
 
-
-    if combined_frames:
-        combined_df = pd.concat(combined_frames, ignore_index=True)
+        combined_df = pd.concat(combined, ignore_index=True)
         min_temp = combined_df["Temp[°C]"].min()
         max_temp = combined_df["Temp[°C]"].max()
 
