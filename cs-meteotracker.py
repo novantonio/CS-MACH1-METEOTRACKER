@@ -1,6 +1,5 @@
 # CS-MACH1 MeteoTracker — Complete Refactored app.py
 
-```python
 from __future__ import annotations
 
 import io
