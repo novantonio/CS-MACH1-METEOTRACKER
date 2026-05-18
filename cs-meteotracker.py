@@ -392,7 +392,7 @@ if "logger_dfs" in st.session_state and st.session_state["logger_dfs"]:
             dl_btn(fig, "temperature_climatology_combined.png", "⬇️ Download Combined Climatology PNG")
             plt.close(fig)
 
-        st.divider()
+            st.divider()
 
         for i, (fname, df) in enumerate(logger_dfs.items()):
             stem = Path(fname).stem
