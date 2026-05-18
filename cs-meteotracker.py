@@ -354,15 +354,27 @@ if "logger_dfs" in st.session_state and st.session_state["logger_dfs"]:
 
         st.divider()
 
-    # Combined view for multiple files
+    st.markdown("## 📊 Combined Analysis — All Sessions")
     if len(logger_dfs) > 1:
         combined = pd.concat(list(logger_dfs.values()), ignore_index=True)
         st.markdown("#### 🗺️ Combined GPS Tracks — All Sessions")
-        combined_map = make_folium_map(combined, map_col)
+        combined_map = make_folium_map(combined, map_color_param)
         if combined_map:
-            st_folium(combined_map, width="100%", height=520, key="combined_map")
+            st_folium(combined_map, width="100%", height=520, key="combined_map_all")
 
-        combined_df = pd.concat(combined, ignore_index=True)
+    # === CLIMATOLOGY PLOTS ===
+    st.markdown("### 🌈 Temperature Climatology (All Files)")
+    combined_frames = []
+    for df in logger_dfs.values():
+        if "Temp[°C]" in df.columns:
+            tmp = df.copy()
+            tmp['Time'] = pd.to_datetime(tmp['Time'])
+            tmp['Hour'] = tmp['Time'].dt.hour
+            tmp['day_of_year'] = tmp['Time'].dt.dayofyear
+            combined_frames.append(tmp)
+
+    if combined_frames:
+        combined_df = pd.concat(combined_frames, ignore_index=True)
         min_temp = combined_df["Temp[°C]"].min()
         max_temp = combined_df["Temp[°C]"].max()
 
@@ -371,8 +383,10 @@ if "logger_dfs" in st.session_state and st.session_state["logger_dfs"]:
 
         # Plot 1: Day of Year vs Hour
         fig1, ax1 = plt.subplots(figsize=(15, 7))
-        scatter1 = ax1.scatter(combined_df['day_of_year'], combined_df['Hour'],
-                               c=combined_df['Temp[°C]'], cmap=cmap, norm=norm, s=20, alpha=0.7)
+        scatter1 = ax1.scatter(
+            combined_df['day_of_year'], combined_df['Hour'],
+            c=combined_df['Temp[°C]'], cmap=cmap, norm=norm, s=20, alpha=0.7
+        )
         plt.colorbar(scatter1, ax=ax1).set_label('Temp[°C]')
         ax1.set_xlabel('Day of Year (1-366)')
         ax1.set_ylabel('Hour of Day')
@@ -386,8 +400,10 @@ if "logger_dfs" in st.session_state and st.session_state["logger_dfs"]:
 
         # Plot 2: Day of Year vs Temperature
         fig2, ax2 = plt.subplots(figsize=(15, 7))
-        scatter2 = ax2.scatter(combined_df['day_of_year'], combined_df['Temp[°C]'],
-                               c=combined_df['Temp[°C]'], cmap=cmap, norm=norm, s=20, alpha=0.7)
+        scatter2 = ax2.scatter(
+            combined_df['day_of_year'], combined_df['Temp[°C]'],
+            c=combined_df['Temp[°C]'], cmap=cmap, norm=norm, s=20, alpha=0.7
+        )
         plt.colorbar(scatter2, ax=ax2).set_label('Temp[°C]')
         ax2.set_xlabel('Day of Year (1-366)')
         ax2.set_ylabel('Temperature [°C]')
@@ -399,6 +415,5 @@ if "logger_dfs" in st.session_state and st.session_state["logger_dfs"]:
         dl_btn(fig2, "temperature_dayofyear_temp.png")
         plt.close(fig2)
 
-# Footer
 st.markdown("---")
 cs_mach1_footer("CS-MACH1 MeteoTracker Pipeline")
