@@ -394,40 +394,40 @@ if "logger_dfs" in st.session_state and st.session_state["logger_dfs"]:
 
         st.divider()
 
-        for i, (fname, df) in enumerate(logger_dfs.items()):
-            stem = Path(fname).stem
-            st.markdown(f"### 📄 {fname}")
-            st.caption(f"{df['Time'].iloc[0]} → {df['Time'].iloc[-1]} | {len(df):,} samples")
-    
-            # Quick metrics
-            avail = available(df, CORE_PARAMS)
-            cols = st.columns(max(len(avail), 1))
-            for c, (col, name, unit, _) in zip(cols, avail):
-                c.metric(name, f"{df[col].mean():.2f} {unit}")
-    
-            # Parameter plots
-            for param_list, title in [
-                (CORE_PARAMS, "🌡️ Core Parameters"),
-                (AQ_PARAMS, "🏭 Air Quality"),
-                (PM_PARAMS, "💨 Particulate Matter"),
-                (EXTRA_PARAMS, "🔬 Extra Parameters")
-            ]:
-                fig = make_param_grid(df, param_list, f"{title} — {stem}", win)
-                if fig:
-                    st.markdown(f"#### {title}")
-                    st.pyplot(fig)
-                    dl_btn(fig, f"{stem}_{title.lower().replace(' ', '_').replace('🌡️','').replace('🏭','').replace('💨','').replace('🔬','')}.png")
-                    plt.close(fig)
-    
-            # Map
-            st.markdown("#### 🗺️ Interactive GPS Map")
-            fmap = make_folium_map(df, map_col)
-            if fmap:
-                st_folium(fmap, width="100%", height=480, key=f"folium_map_{i}_{stem}")
-            else:
-                st.info("No GPS data available for this session.")
+    for i, (fname, df) in enumerate(logger_dfs.items()):
+        stem = Path(fname).stem
+        st.markdown(f"### 📄 {fname}")
+        st.caption(f"{df['Time'].iloc[0]} → {df['Time'].iloc[-1]} | {len(df):,} samples")
 
-        st.divider()
+        # Quick metrics
+        avail = available(df, CORE_PARAMS)
+        cols = st.columns(max(len(avail), 1))
+        for c, (col, name, unit, _) in zip(cols, avail):
+            c.metric(name, f"{df[col].mean():.2f} {unit}")
+
+        # Parameter plots
+        for param_list, title in [
+            (CORE_PARAMS, "🌡️ Core Parameters"),
+            (AQ_PARAMS, "🏭 Air Quality"),
+            (PM_PARAMS, "💨 Particulate Matter"),
+            (EXTRA_PARAMS, "🔬 Extra Parameters")
+        ]:
+            fig = make_param_grid(df, param_list, f"{title} — {stem}", win)
+            if fig:
+                st.markdown(f"#### {title}")
+                st.pyplot(fig)
+                dl_btn(fig, f"{stem}_{title.lower().replace(' ', '_').replace('🌡️','').replace('🏭','').replace('💨','').replace('🔬','')}.png")
+                plt.close(fig)
+
+        # Map
+        st.markdown("#### 🗺️ Interactive GPS Map")
+        fmap = make_folium_map(df, map_col)
+        if fmap:
+            st_folium(fmap, width="100%", height=480, key=f"folium_map_{i}_{stem}")
+        else:
+            st.info("No GPS data available for this session.")
+
+    st.divider()
 
 st.markdown("---")
 cs_mach1_footer("CS-MACH1 MeteoTracker Pipeline")
