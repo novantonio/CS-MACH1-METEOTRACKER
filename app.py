@@ -4,7 +4,7 @@ Streamlit app: upload one or more AirLogger CSV files, visualise all
 environmental parameters, and compare daily/session summaries.
 """
 
-
+from __future__ import annotations
 import streamlit as st
 
 """
@@ -14,7 +14,7 @@ Kept framework-agnostic (no Streamlit imports here) so it can be reused
 in Colab, batch scripts, or other apps - only app.py talks to Streamlit.
 """
 
-from __future__ import annotations
+
 
 import warnings
 from pathlib import Path
