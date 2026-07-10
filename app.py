@@ -2,29 +2,38 @@
 CS-MACH1 AirLogger Environmental Data Explorer
 Streamlit app: upload one or more AirLogger CSV files, visualise all
 environmental parameters, and compare daily/session summaries.
+
+Single-file version: parsing/plotting utilities live here directly
+(previously in src/airlogger.py) for a simpler, standalone deployment.
 """
 
 from __future__ import annotations
-import streamlit as st
-
-"""
-CS-MACH1 AirLogger - core parsing and plotting utilities.
-
-Kept framework-agnostic (no Streamlit imports here) so it can be reused
-in Colab, batch scripts, or other apps - only app.py talks to Streamlit.
-"""
-
-
 
 import warnings
 from pathlib import Path
 
+import folium
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import pandas as pd
-import plotly.graph_objects as go
+import streamlit as st
+from streamlit_folium import st_folium
 
 warnings.filterwarnings("ignore")
+
+# ── Page config ─────────────────────────────────────────────────────────
+
+st.set_page_config(
+    page_title="CS-MACH1 AirLogger Pipeline",
+    page_icon="🌬️",
+    layout="wide",
+)
+
+st.title("🌬️ CS-MACH1: AirLogger Environmental Data Explorer")
+st.caption(
+    "Upload one or more AirLogger CSV files to visualise all environmental "
+    "parameters and compare their daily means across sessions."
+)
 
 # ── Constants ────────────────────────────────────────────────────────────
 
@@ -119,59 +128,72 @@ def make_3x3_figure(df: pd.DataFrame, label: str, window: int,
     return fig
 
 
-def make_trajectory_map(df: pd.DataFrame, label: str) -> go.Figure | None:
+def make_trajectory_map_folium(df: pd.DataFrame, label: str) -> folium.Map | None:
     """
-    Plotly trajectory map (Lat/Lon) with start/end markers, or None if no
-    valid coordinates are present.
+    Folium trajectory map (Lat/Lon) with start/end markers, or None if no
+    valid coordinates are present. Renders in Streamlit via
+    streamlit_folium.st_folium(map, ...).
 
-    Uses Plotly instead of Cartopy on purpose: Cartopy ships a compiled C
-    extension (cartopy.trace) that needs a prebuilt wheel matching the
-    Python version and system GEOS/PROJ libraries. Streamlit Community
-    Cloud frequently runs a Python version without a matching cartopy
-    wheel, which breaks the import at deploy time. Plotly's map traces
-    are pure Python/JS and have no such binary dependency.
+    Folium is used instead of Cartopy on purpose: Cartopy ships a compiled
+    C extension (cartopy.trace) that needs a prebuilt wheel matching the
+    exact Python version plus system GEOS/PROJ libraries, which frequently
+    breaks on Streamlit Community Cloud. Folium (Leaflet.js under the hood)
+    has no compiled dependency and is already used across the other
+    CS-MACH1 apps.
     """
     if "Lat" not in df.columns or "Lon" not in df.columns:
         return None
     if df["Lat"].isna().all() or df["Lon"].isna().all():
         return None
 
-    fig = go.Figure()
+    track_df = df.dropna(subset=["Lat", "Lon"])
+    coords = list(zip(track_df["Lat"], track_df["Lon"]))
+    if not coords:
+        return None
 
-    fig.add_trace(go.Scattergeo(
-        lon=df["Lon"], lat=df["Lat"],
-        mode="lines+markers",
-        line=dict(width=2, color="blue"),
-        marker=dict(size=4, color="blue"),
+    center_lat = track_df["Lat"].mean()
+    center_lon = track_df["Lon"].mean()
+
+    m = folium.Map(location=[center_lat, center_lon], zoom_start=13,
+                    tiles="CartoDB positron")
+
+    # track line
+    folium.PolyLine(
+        locations=coords,
+        color="blue",
+        weight=2,
         opacity=0.7,
-        name="Track",
-    ))
-    fig.add_trace(go.Scattergeo(
-        lon=[df["Lon"].iloc[0]], lat=[df["Lat"].iloc[0]],
-        mode="markers",
-        marker=dict(size=12, color="green", symbol="triangle-up"),
-        name="Start",
-    ))
-    fig.add_trace(go.Scattergeo(
-        lon=[df["Lon"].iloc[-1]], lat=[df["Lat"].iloc[-1]],
-        mode="markers",
-        marker=dict(size=12, color="red", symbol="triangle-down"),
-        name="End",
-    ))
+        tooltip=f"Track — {label}",
+    ).add_to(m)
 
-    fig.update_geos(
-        showcoastline=True, coastlinecolor="black",
-        showland=True, landcolor="lightgray",
-        showocean=True, oceancolor="lightblue",
-        showcountries=True, countrycolor="gray",
-        fitbounds="locations",
-    )
-    fig.update_layout(
-        title=f"Trajectory for {label}",
-        margin=dict(l=0, r=0, t=40, b=0),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02),
-    )
-    return fig
+    # raw points as small markers
+    for lat, lon in coords:
+        folium.CircleMarker(
+            location=[lat, lon],
+            radius=2,
+            color="blue",
+            fill=True,
+            fill_opacity=0.7,
+        ).add_to(m)
+
+    # start marker
+    folium.Marker(
+        location=[coords[0][0], coords[0][1]],
+        popup="Start",
+        tooltip="Start",
+        icon=folium.Icon(color="green", icon="play", prefix="fa"),
+    ).add_to(m)
+
+    # end marker
+    folium.Marker(
+        location=[coords[-1][0], coords[-1][1]],
+        popup="End",
+        tooltip="End",
+        icon=folium.Icon(color="red", icon="stop", prefix="fa"),
+    ).add_to(m)
+
+    m.fit_bounds(coords)
+    return m
 
 
 def compute_metrics(df: pd.DataFrame) -> dict[str, float]:
@@ -182,19 +204,6 @@ def compute_metrics(df: pd.DataFrame) -> dict[str, float]:
             metrics[name] = round(df[col].mean(), 2)
     return metrics
 
-# ── Page config ─────────────────────────────────────────────────────────
-
-st.set_page_config(
-    page_title="CS-MACH1 AirLogger Pipeline",
-    page_icon="🌬️",
-    layout="wide",
-)
-
-st.title("🌬️ CS-MACH1: AirLogger Environmental Data Explorer")
-st.caption(
-    "Upload one or more AirLogger CSV files to visualise all environmental "
-    "parameters and compare their daily means across sessions."
-)
 
 # ── Session state ───────────────────────────────────────────────────────
 # logger_dfs: parsed, unmodified per-file DataFrames (kept separate from
@@ -300,10 +309,10 @@ else:
                 unit = next(u for _, n, u, _ in PARAMS if n == name)
                 c.metric(name, f"{val:.2f} {unit}")
 
-            traj_fig = make_trajectory_map(df, label)
-            if traj_fig is not None:
+            traj_map = make_trajectory_map_folium(df, label)
+            if traj_map is not None:
                 st.markdown("**📍 Trajectory Map**")
-                st.plotly_chart(traj_fig, use_container_width=True, key=f"map_{fname}")
+                st_folium(traj_map, use_container_width=True, height=450, key=f"map_{fname}")
             else:
                 st.caption("No valid Lat/Lon data found for this file.")
 
