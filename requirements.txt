@@ -1,5 +1,6 @@
-cartopy
 streamlit>=1.35
 pandas>=2.0
 matplotlib>=3.7
+plotly>=5.20
 numpy>=1.24
+ 
