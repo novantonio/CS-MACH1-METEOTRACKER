@@ -7,22 +7,22 @@ environmental parameters, and compare daily/session summaries.
 from __future__ import annotations
 
 from pathlib import Path
+import warnings
 
+import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
+import pandas as pd
+import cartopy
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
+import matplotlib.pyplot as plt
+
 import pandas as pd
 import streamlit as st
 
 
 
-import warnings
-from pathlib import Path
 
-import matplotlib.dates as mdates
-import matplotlib.pyplot as plt
-import pandas as pd
-
-import cartopy.crs as ccrs
-import cartopy.feature as cfeature
 
 warnings.filterwarnings("ignore")
 
