@@ -12,15 +12,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import streamlit as st
 
-from src.airlogger import (
-    PARAMS,
-    compute_metrics,
-    make_3x3_figure,
-    make_trajectory_map,
-    parse_airlog_csv,
-)
 
-from __future__ import annotations
 
 import warnings
 from pathlib import Path
