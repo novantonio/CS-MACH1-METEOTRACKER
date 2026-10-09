@@ -1,4 +1,4 @@
-# there is a new optimized project 
+20261008 - consider the new project CSMACH1 for the MeteoTracker 
 
 # CS-MACH1 AirLogger Environmental Data Explorer
 
